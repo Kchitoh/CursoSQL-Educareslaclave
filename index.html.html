@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso Completo de SQL | Educar es la Clave - Nicolás E. Costante</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eelc: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                            accent: '#ec4899',
+                            pink: '#d946ef',
+                            darkBg: '#0b0614',
+                            cardBg: 'rgba(23, 14, 39, 0.75)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom Geometric Low-Poly Style Background */
+        body {
+            background-color: #0b0614;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.2) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(91, 33, 182, 0.25) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(22, 14, 38, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 92, 246, 0.18);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(168, 85, 247, 0.35);
+        }
+
+        /* Hero Banner Poly Overlay */
+        .poly-bg {
+            background: linear-gradient(135deg, rgba(76, 29, 149, 0.95) 0%, rgba(124, 58, 237, 0.85) 45%, rgba(217, 70, 239, 0.8) 100%),
+                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpolygon points='0,0 100,0 50,100' fill='rgba(255,255,255,0.03)'/%3E%3Cpolygon points='0,100 100,100 50,0' fill='rgba(0,0,0,0.05)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0614;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5b21b6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7c3aed;
+        }
+    </style>
+</head>
+<body class="text-slate-200 font-sans min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-in-out bg-slate-900 border border-purple-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-pink-400 text-xl"></i>
+        <span id="toast-message" class="text-sm font-medium">Notificación</span>
+    </div>
+
+    <!-- MAIN HEADER / HERO SECTION -->
+    <header class="relative overflow-hidden border-b border-purple-900/40 poly-bg shadow-2xl">
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-[1px]"></div>
+        
+        <!-- TOP USER AUTH STATUS BAR -->
+        <div class="relative z-20 border-b border-white/10 bg-slate-950/60 backdrop-blur-md px-4 sm:px-8 py-2.5">
+            <div class="max-w-7xl mx-auto flex items-center justify-between text-xs">
+                
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-900/50 border border-purple-400/30 text-purple-200 font-medium">
+                        <i class="fa-solid fa-graduation-cap text-pink-400"></i> Plataforma EELC
+                    </span>
+                    <!-- Sync Status Indicator -->
+                    <span id="sync-status" class="hidden sm:inline-flex items-center gap-1.5 text-amber-300 font-medium">
+                        <i class="fa-solid fa-hard-drive text-amber-400"></i> Modo Local (Guardado en navegador)
+                    </span>
+                </div>
+
+                <!-- User Profile / Auth Control Widget -->
+                <div id="user-auth-widget" class="flex items-center space-x-3">
+                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold flex items-center gap-2 shadow-md transition transform hover:scale-105">
+                        <i class="fa-solid fa-user-check"></i> Identificar mi Email
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 relative z-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                
+                <!-- Brand & Logo -->
+                <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6">
+                    <div class="relative group">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-md opacity-80 group-hover:opacity-100 transition duration-500"></div>
+                        <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-purple-900 via-purple-600 to-pink-500 flex items-center justify-center p-1 shadow-2xl border-2 border-white/20">
+                            <svg class="w-16 h-16 text-white drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18C5 19.4 8.13 21.2 12 21.2C15.87 21.2 19 19.4 19 17.18V13.18L12 17L5 13.18Z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold tracking-wider text-pink-200 uppercase mb-2">
+                            <i class="fa-brands fa-youtube text-red-500"></i> Canal de YouTube Educareslaclave
+                        </div>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white uppercase drop-shadow-lg">
+                            EDUCAR ES LA <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-white">CLAVE</span>
+                        </h1>
+                        <p class="text-xl sm:text-2xl font-bold text-purple-200 mt-1 flex items-center justify-center sm:justify-start gap-2">
+                            <span>Curso Completo de SQL</span>
+                            <span class="text-xs bg-pink-600 text-white px-2 py-0.5 rounded font-mono">38 Clases</span>
+                        </p>
+                        <p class="text-slate-300 font-medium text-sm sm:text-base mt-2 flex items-center justify-center sm:justify-start gap-2">
+                            <i class="fa-solid fa-user-tie text-pink-400"></i> Por <span class="text-white font-bold tracking-wide underline decoration-pink-500 underline-offset-4">Nicolás E. Costante</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Channel Quick Actions & Info -->
+                <div class="flex flex-col items-center md:items-end space-y-4 w-full md:w-auto">
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-end">
+                        <button onclick="openCheatSheet()" class="px-4 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-400/30 text-white font-semibold text-sm transition-all shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95">
+                            <i class="fa-solid fa-code text-pink-400"></i> SQL Cheat Sheet
+                        </button>
+                        <a href="https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s" target="_blank" rel="noopener" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold text-sm transition-all shadow-lg shadow-pink-500/25 flex items-center gap-2 hover:scale-105 active:scale-95">
+                            <i class="fa-brands fa-youtube"></i> Ver en YouTube
+                        </a>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-sm text-center">
+                        <div class="glass-card p-2.5 rounded-xl border border-white/10">
+                            <div class="text-lg font-bold text-white">38</div>
+                            <div class="text-[10px] sm:text-xs text-purple-200 uppercase font-semibold">Clases</div>
+                        </div>
+                        <div class="glass-card p-2.5 rounded-xl border border-white/10">
+                            <div class="text-lg font-bold text-pink-300">Práctico</div>
+                            <div class="text-[10px] sm:text-xs text-purple-200 uppercase font-semibold">Y Teórico</div>
+                        </div>
+                        <div class="glass-card p-2.5 rounded-xl border border-white/10">
+                            <div class="text-lg font-bold text-purple-300">MySQL</div>
+                            <div class="text-[10px] sm:text-xs text-purple-200 uppercase font-semibold">Workbench</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- LIVE PROGRESS TRACKER BAR -->
+    <section class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-xl border-b border-purple-900/40 shadow-xl py-3 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white font-bold text-xs shadow">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs uppercase font-bold tracking-wider text-purple-300 block">Progreso del Curso</span>
+                        <span id="progress-text" class="text-sm font-extrabold text-white">0 / 38 Clases Completadas</span>
+                    </div>
+                </div>
+                <span id="progress-percent" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-300 ml-4">0%</span>
+            </div>
+
+            <div class="w-full md:w-1/2 bg-slate-800/80 rounded-full h-3.5 overflow-hidden p-0.5 border border-purple-900/50 shadow-inner">
+                <div id="progress-bar-fill" class="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-purple-400 transition-all duration-500 ease-out w-0 shadow-lg shadow-pink-500/50"></div>
+            </div>
+
+            <div class="flex items-center space-x-2 text-xs">
+                <button onclick="toggleAllAccordions(true)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition" title="Expandir todo">
+                    <i class="fa-solid fa-angles-down"></i> Expandir
+                </button>
+                <button onclick="toggleAllAccordions(false)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition" title="Colapsar todo">
+                    <i class="fa-solid fa-angles-up"></i> Colapsar
+                </button>
+                <button onclick="resetProgress()" class="px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/40 font-medium transition" title="Reiniciar progreso">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SEARCH & FILTER TOOLBAR -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 w-full">
+        <div class="glass-card p-4 sm:p-6 rounded-2xl border border-purple-900/30 shadow-2xl flex flex-col gap-5">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="relative w-full md:w-1/2">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-purple-400"></i>
+                    <input type="text" id="search-input" onkeyup="filterClasses()" placeholder="Buscar por tema, comando (SELECT, JOIN, TRIGGER) o número de clase..." 
+                        class="w-full pl-11 pr-10 py-3 rounded-xl bg-slate-900/90 border border-purple-800/50 text-white placeholder-slate-400 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 text-sm transition">
+                    <button onclick="clearSearch()" id="clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-purple-900/40 text-xs font-semibold w-full md:w-auto justify-center">
+                    <button onclick="setFilterStatus('all')" id="btn-status-all" class="px-3.5 py-2 rounded-lg bg-purple-600 text-white shadow font-bold transition">Todas</button>
+                    <button onclick="setFilterStatus('pending')" id="btn-status-pending" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">Pendientes</button>
+                    <button onclick="setFilterStatus('completed')" id="btn-status-completed" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">Completadas</button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none" id="module-pills-container"></div>
+        </div>
+    </section>
+
+    <!-- MAIN SYLLABUS CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        <div id="modules-container" class="space-y-6"></div>
+
+        <div id="empty-state" class="hidden glass-card p-12 text-center rounded-2xl my-8">
+            <i class="fa-solid fa-folder-open text-5xl text-purple-400/50 mb-3"></i>
+            <h3 class="text-xl font-bold text-white mb-1">No se encontraron clases</h3>
+            <p class="text-slate-400 text-sm">Prueba ajustando los términos de búsqueda o los filtros aplicados.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-500 transition">
+                Restablecer filtros
+            </button>
+        </div>
+    </main>
+
+    <!-- USER IDENTIFICATION MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <div class="glass-card bg-slate-950 border border-purple-500/40 rounded-2xl max-w-md w-full flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-purple-900/50 flex items-center justify-between bg-gradient-to-r from-purple-950 to-slate-900">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center shadow">
+                        <i class="fa-solid fa-id-card text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Guarda tu Avance</h3>
+                        <p class="text-xs text-purple-300">Sincronización con Google Sheets</p>
+                    </div>
+                </div>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4 text-sm">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Ingresa tu correo electrónico o un nombre de usuario para guardar tus clases completadas directamente en la planilla del curso:
+                </p>
+
+                <form id="auth-form" onsubmit="handleUserIdentify(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Tu Email / Nombre de Usuario</label>
+                        <input type="text" id="auth-username-input" required placeholder="ejemplo@correo.com" 
+                            class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-purple-800/50 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-sm transition shadow-lg">
+                        Cargar / Guardar mi Progreso
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-4 border-t border-purple-900/50 bg-slate-950 flex justify-center">
+                <button onclick="closeAuthModal()" class="text-xs text-slate-400 hover:text-purple-300 underline">
+                    Continuar como invitado (Progreso guardado solo en este equipo)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SQL CHEAT SHEET MODAL -->
+    <div id="cheat-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <div class="glass-card bg-slate-950 border border-purple-500/40 rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-purple-900/50 flex items-center justify-between bg-gradient-to-r from-purple-950 to-slate-900">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center">
+                        <i class="fa-solid fa-terminal text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">SQL Cheat Sheet & Sintaxis Rápida</h3>
+                        <p class="text-xs text-purple-300">Guía de referencia directa de MySQL Workbench</p>
+                    </div>
+                </div>
+                <button onclick="closeCheatSheet()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 text-sm">
+                <div>
+                    <h4 class="text-pink-400 font-bold uppercase text-xs tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-pink-500"></span> Sublenguaje DDL (Data Definition Language)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-purple-900/40 font-mono text-xs">
+                            <span class="text-purple-400 font-bold">CREATE TABLE</span> alumnos (<br>
+                            &nbsp;&nbsp;id <span class="text-yellow-300">INT PRIMARY KEY AUTO_INCREMENT</span>,<br>
+                            &nbsp;&nbsp;nombre <span class="text-yellow-300">VARCHAR(50) NOT NULL</span><br>
+                            );
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-purple-900/40 font-mono text-xs">
+                            <span class="text-purple-400 font-bold">ALTER TABLE</span> alumnos <span class="text-pink-400">ADD COLUMN</span> email <span class="text-yellow-300">VARCHAR(100)</span>;<br>
+                            <span class="text-purple-400 font-bold">DROP TABLE</span> alumnos;<br>
+                            <span class="text-purple-400 font-bold">TRUNCATE TABLE</span> alumnos;
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-purple-300 font-bold uppercase text-xs tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-purple-400"></span> Sublenguaje DML (Data Manipulation Language)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-purple-900/40 font-mono text-xs">
+                            <span class="text-purple-400 font-bold">INSERT INTO</span> alumnos (nombre) <span class="text-purple-400 font-bold">VALUES</span> ('Nicolás');<br>
+                            <span class="text-purple-400 font-bold">UPDATE</span> alumnos <span class="text-purple-400 font-bold">SET</span> nombre = 'Nico' <span class="text-purple-400 font-bold">WHERE</span> id = 1;<br>
+                            <span class="text-purple-400 font-bold">DELETE FROM</span> alumnos <span class="text-purple-400 font-bold">WHERE</span> id = 1;
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-purple-900/40 font-mono text-xs">
+                            <span class="text-purple-400 font-bold">SELECT</span> a.nombre, c.curso<br>
+                            <span class="text-purple-400 font-bold">FROM</span> alumnos a<br>
+                            <span class="text-pink-400 font-bold">INNER JOIN</span> inscripciones c <span class="text-purple-400 font-bold">ON</span> a.id = c.alumno_id<br>
+                            <span class="text-purple-400 font-bold">WHERE</span> a.estado = 1;
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-yellow-400"></span> Disparadores (Triggers) & Procedimientos
+                    </h4>
+                    <div class="bg-slate-900 p-3.5 rounded-xl border border-purple-900/40 font-mono text-xs text-slate-300">
+                        <span class="text-pink-400 font-bold">DELIMITER</span> // <br>
+                        <span class="text-purple-400 font-bold">CREATE TRIGGER</span> before_insert_pruebanumericas <br>
+                        <span class="text-purple-400 font-bold">BEFORE INSERT ON</span> pruebanumericas <br>
+                        <span class="text-purple-400 font-bold">FOR EACH ROW BEGIN</span> <br>
+                        &nbsp;&nbsp;<span class="text-purple-400 font-bold">SET</span> NEW.PrecioConIva = NEW.PrecioSinIva * 1.21; <br>
+                        <span class="text-purple-400 font-bold">END;</span> // <br>
+                        <span class="text-pink-400 font-bold">DELIMITER</span> ;
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-purple-900/50 bg-slate-950 flex justify-end">
+                <button onclick="closeCheatSheet()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="mt-16 border-t border-purple-900/40 bg-slate-950/90 py-10 text-slate-400 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center space-x-3 text-center md:text-left">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-700 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <div class="text-white font-black tracking-wider uppercase">Educar es la Clave</div>
+                    <div class="text-xs text-purple-300">Programa del Curso Completo de SQL &bull; Nicolás E. Costante</div>
+                </div>
+            </div>
+
+            <div class="text-center text-xs text-slate-400">
+                Transformando datos en información de alto valor | Formación Práctica en Bases de Datos Relacionales
+            </div>
+
+            <div class="flex items-center space-x-4 text-lg">
+                <a href="https://www.youtube.com/educareslaclave" target="_blank" rel="noopener" class="text-slate-400 hover:text-pink-400 transition" title="Canal de YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://github.com/Kchitoh/CursoSQL-Educareslaclave" target="_blank" rel="noopener" class="text-slate-400 hover:text-purple-400 transition" title="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/nicolascostante/" target="_blank" rel="noopener" class="text-slate-400 hover:text-blue-400 transition" title="LinkedIn">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MAIN APPLICATION SCRIPT -->
+    <script>
+        // =========================================================================
+        // CONFIGURACIÓN DE GOOGLE APPS SCRIPT
+        // Reemplaza esta URL con la que obtuviste al desplegar en Apps Script:
+        // =========================================================================
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDyTDm-Ay8-0rq7Z8X3fukvkTsdczjrvBXFiWlIv-Sr7q2dktmhcrpGB_HquuqUzv4Qw/exec";
+
+        // PROGRAMA COMPLETO DE 38 CLASES (0 A 36 + BONUS)
+        const syllabusData = [
+            {
+                id: "mod-1",
+                moduleNumber: 1,
+                title: "Módulo 1: Fundamentos y Configuración",
+                description: "Introducción al universo de las bases de datos relacionales, instalación y primeros pasos en MySQL Workbench",
+                icon: "fa-database",
+                classes: [
+                    {
+                        id: 0,
+                        title: "Clase 0: Vuelta de EELC y Presentación del Curso de SQL",
+                        youtubeTitle: "VUELTA Y PRESENTACIÓN CURSO SQL - Educar es la Clave",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Comentarios sobre Nicolás E. Costante y el canal Educar es la Clave",
+                            "Metodología del curso completo de SQL",
+                            "Estructura del programa y objetivos de empleabilidad"
+                        ],
+                        badge: "Presentación",
+                        isBonus: false
+                    },
+                    {
+                        id: 1,
+                        title: "Clase 1: Introducción a SQL",
+                        youtubeTitle: "INTRODUCCIÓN A SQL - CLASE 1",
+                        youtubeUrl: "https://www.youtube.com/watch?v=5nHFJQqkpR4",
+                        topics: [
+                            "Enfoque directo y práctico (sin rodeos históricos)",
+                            "¿Qué son las Bases de Datos y por qué son vitales?",
+                            "Transformación de datos crudos en información estratégica",
+                            "Importancia y ventajas competitivas de aprender SQL",
+                            "Visión general de MySQL Workbench"
+                        ],
+                        badge: "Teoría & Conceptos",
+                        isBonus: false
+                    },
+                    {
+                        id: 2,
+                        title: "Clase 2: Instalación de MySQL Workbench en Windows Paso a Paso",
+                        youtubeTitle: "COMO INSTALAR MYSQL WORKBENCH EN WINDOWS PASO A PASO - EXPLICACION DETALLADA - CLASE 2",
+                        youtubeUrl: "https://www.youtube.com/watch?v=MNvgY9_QW6Q",
+                        topics: [
+                            "Guía de instalación minuciosamente detallada en Windows",
+                            "Descarga e instalación del servidor MySQL Server y Workbench",
+                            "Resolución de errores comunes durante el setup y conexión local",
+                            "Inclusión de guía de instalación oficial en Word/Docx"
+                        ],
+                        badge: "Instalación",
+                        isBonus: false
+                    },
+                    {
+                        id: 3,
+                        title: "Clase 3: Bases de Datos (BBDD) y Tablas en SQL",
+                        youtubeTitle: "QUE SON LAS BASES DE DATOS RELACIONALES Y LAS TABLAS EN SQL - CLASE 3",
+                        youtubeUrl: "https://www.youtube.com/watch?v=LCOE-iBuMRY",
+                        topics: [
+                            "Uso de las BBDD a lo largo de la historia moderna",
+                            "¿Dónde se almacenan físicamente las BBDD?",
+                            "Sistemas de Gestión de Bases de Datos (SGBD / DBMS)",
+                            "Operaciones CRUD (Create, Read, Update, Delete)",
+                            "BBDD Plana vs. BBDD Relacional",
+                            "Anatomía de una Tabla: Filas (Registros), Columnas (Campos) y Tuplas"
+                        ],
+                        badge: "Fundamentos BBDD",
+                        isBonus: false
+                    },
+                    {
+                        id: 4,
+                        title: "Clase 4: Tipos de Relaciones entre Tablas, Primary Key y Foreign Key",
+                        youtubeTitle: "COMO SE RELACIONAN LAS TABLAS EN SQL - TIPOS DE RELACIONES - PRIMARY KEY FOREIGN KEY - CLASE 4",
+                        youtubeUrl: "https://www.youtube.com/watch?v=7UvrxtyZBns",
+                        topics: [
+                            "Tipos de relaciones: 1 a 1 (1:1), 1 a Muchos (1:N), Muchos a Muchos (N:M)",
+                            "Clave Primaria (Primary Key / PK)",
+                            "Clave Foránea (Foreign Key / FK)",
+                            "Claves Candidatas y Claves Concatenadas / Compuestas"
+                        ],
+                        badge: "Relaciones & Claves",
+                        isBonus: false
+                    },
+                    {
+                        id: 5,
+                        title: "Clase 5: Diagrama Entidad-Relación (DER)",
+                        youtubeTitle: "QUE ES UN DIAGRAMA ENTIDAD RELACION ? - DER EN SQL - CLASE #5",
+                        youtubeUrl: "https://youtu.be/9gpqLwEdfEY",
+                        topics: [
+                            "¿Qué es un Diagrama Entidad-Relación (DER / ERD)?",
+                            "Componentes: Entidades, Atributos, Relaciones y Acciones",
+                            "Ejemplo práctico: DER completo de una biblioteca pública",
+                            "Beneficios del diseño previo de BBDD",
+                            "Generación automática de DER e Ingeniería Inversa en MySQL Workbench"
+                        ],
+                        badge: "Modelado DER",
+                        isBonus: false
+                    },
+                    {
+                        id: 6,
+                        title: "Clase 6: Introducción a MySQL Workbench",
+                        youtubeTitle: "COMO USAR SQL? INTRODUCCION A MYSQL WORKBENCH - CLASE #6",
+                        youtubeUrl: "https://youtu.be/7Y0N9-u-6RU",
+                        topics: [
+                            "Recorrido completo por la interfaz gráfica de MySQL Workbench",
+                            "Cómo conectar, crear pestañas de consulta y ejecutar scripts",
+                            "Paneles: Navigator, Query Editor, Output Console",
+                            "Interpretación de mensajes de error, advertencias (Warnings) y ejecución de líneas selectivas"
+                        ],
+                        badge: "Práctica Workbench",
+                        isBonus: false
+                    }
+                ]
+            },
+            {
+                id: "mod-2",
+                moduleNumber: 2,
+                title: "Módulo 2: Primeras consultas, aprendiendo a filtrar datos",
+                description: "Dominio de sintaxis SELECT, sublenguajes SQL, filtrado con WHERE, ordenamiento, subconsultas y tipos de datos.",
+                icon: "fa-filter",
+                classes: [
+                    {
+                        id: 7,
+                        title: "Clase 7: Lenguaje y Sublenguajes SQL - Sentencias Básicas y SELECT",
+                        youtubeTitle: "COMO USAR SELECT EN SQL? - LENGUAJE Y SUBLENGUAJE SQL - SENTENCIAS BASICAS - CLASE #7",
+                        youtubeUrl: "https://youtu.be/jt_D_m-S1eA",
+                        topics: [
+                            "Introducción al estándar SQL",
+                            "Sublenguajes SQL: DDL, DML, DCL, TCL",
+                            "¿Qué son las sentencias y consultas? Sintaxis y buenas prácticas",
+                            "Estructura básica de consulta SQL",
+                            "Uso práctico de SELECT y alias (AS) en MySQL Workbench"
+                        ],
+                        badge: "Sintaxis & SELECT",
+                        isBonus: false,
+                        snippet: "SELECT id, nombre, email AS correo\nFROM clientes\nWHERE estado = 1;"
+                    },
+                    {
+                        id: 8,
+                        title: "Clase 8: WHERE, Operadores de Comparación y Sentencias Básicas",
+                        youtubeTitle: "COMO USAR WHERE EN SQL? - OPERADORES DE COMPARACION- SENTENCIAS BASICAS - CLASE #8",
+                        youtubeUrl: "https://youtu.be/oDrbPY-lRG8",
+                        topics: [
+                            "Teoría y lógica de operadores de comparación (=, !=, <, >, <=, >=)",
+                            "Operadores lógicos: AND, OR, NOT",
+                            "Filtrado preciso de registros con la cláusula WHERE",
+                            "Ejercicios prácticos en Workbench"
+                        ],
+                        badge: "Filtrado WHERE",
+                        isBonus: false,
+                        snippet: "SELECT * FROM productos\nWHERE precio >= 1500.00 AND stock > 0;"
+                    },
+                    {
+                        id: 9,
+                        title: "Clase 9: Subconsultas, ORDER BY y LIMIT",
+                        youtubeTitle: "COMO USAR ORDER BY EN SQL? - SUBCONSULTAS - LIMIT - CLASE #9",
+                        youtubeUrl: "https://youtu.be/gdXT3HRRZE8",
+                        topics: [
+                            "Concepto e introducción a Subconsultas (Subqueries)",
+                            "Ordenamiento de resultados con ORDER BY (ASC / DESC)",
+                            "Paginación y restricción de registros con LIMIT y OFFSET",
+                            "Práctica combinada de consultas complejas"
+                        ],
+                        badge: "Order & Subconsultas",
+                        isBonus: false,
+                        snippet: "SELECT * FROM empleados\nWHERE salario > (SELECT AVG(salario) FROM empleados)\nORDER BY salario DESC\nLIMIT 5;"
+                    },
+                    {
+                        id: 10,
+                        title: "Clase 10: Operador LIKE y Patrones de Búsqueda",
+                        youtubeTitle: "COMO USAR EL OPERADOR LIKE EN SQL? - CLASE #10",
+                        youtubeUrl: "https://youtu.be/7lSUU73tKZ0",
+                        topics: [
+                            "Teoría del operador LIKE para búsqueda textual flexibilizada",
+                            "Comodines (Wildcards): Porcentaje '%' y Guión bajo '_'",
+                            "Búsqueda por prefijo, sufijo y coincidencias internas",
+                            "Casos de uso reales en MySQL Workbench"
+                        ],
+                        badge: "Búsqueda LIKE",
+                        isBonus: false,
+                        snippet: "SELECT * FROM clientes\nWHERE apellido LIKE 'Gonz%' OR email LIKE '%@gmail.com';"
+                    },
+                    {
+                        id: 11,
+                        title: "Clase 11: Tipos de Datos en SQL",
+                        youtubeTitle: "CUALES SON LOS TIPOS DE DATOS QUE SE PUEDEN USAR EN SQL? - CLASE #11",
+                        youtubeUrl: "https://youtu.be/zw3DboRqGt4",
+                        topics: [
+                            "Numéricos exactos: TINYINT, SMALLINT, INT, BIGINT, DECIMAL, NUMERIC",
+                            "Numéricos aproximados: FLOAT, DOUBLE, REAL",
+                            "Fecha y Hora: DATE, TIME, DATETIME, TIMESTAMP, YEAR",
+                            "Cadenas de texto: CHAR, VARCHAR, TEXT",
+                            "Cadenas Unicode y Binarias: NCHAR, NVARCHAR, BINARY, VARBINARY, BLOB",
+                            "Tipos avanzados y modernos: JSON, GEOMETRY, ENUM, SET"
+                        ],
+                        badge: "Data Types",
+                        isBonus: false
+                    }
+                ]
+            },
+            {
+                id: "mod-3",
+                moduleNumber: 3,
+                title: "Módulo 3: Sublenguaje DDL, Agregaciones, Group by y Having",
+                description: "Creación, modificación y eliminación de tablas con DDL, funciones de agregación, agrupamieto y filtrado de datos agrupado (HAVING).",
+                icon: "fa-layer-group",
+                classes: [
+                    {
+                        id: 12,
+                        title: "Clase 12: Sublenguaje DDL - CREATE TABLE",
+                        youtubeTitle: "SUBLENGUAJE DDL - COMO USAR CREATE TABLE EN SQL? - CLASE #12 Parte 1",
+                        youtubeUrl: "https://youtu.be/_etTxKHTY0U",
+                        topics: [
+                            "Teoría de Data Definition Language (DDL)",
+                            "Sintaxis de CREATE TABLE",
+                            "Definición de columnas, tipos de datos y restricciones (NOT NULL, UNIQUE, DEFAULT)",
+                            "Práctica paso a paso de creación de tablas relacionales"
+                        ],
+                        badge: "DDL Create",
+                        isBonus: false,
+                        snippet: "CREATE TABLE clientes (\n  cliente_id INT AUTO_INCREMENT PRIMARY KEY,\n  nombre VARCHAR(60) NOT NULL,\n  email VARCHAR(100) UNIQUE,\n  fecha_alta DATE DEFAULT (CURRENT_DATE)\n);"
+                    },
+                    {
+                        id: 13,
+                        title: "Clase 13: Sublenguaje DDL Parte 2 - ALTER, DROP y TRUNCATE",
+                        youtubeTitle: "SUBLENGUAJE DDL - COMO USAR ALTER, DROP y TRUNCATE EN SQL? - CLASE #13",
+                        youtubeUrl: "https://youtu.be/fGix1SzS1Og",
+                        topics: [
+                            "ALTER TABLE: Añadir, modificar o eliminar columnas y restricciones",
+                            "DROP TABLE: Eliminación definitiva de tablas y estructura",
+                            "TRUNCATE TABLE: Vaciado rápido de datos manteniendo la estructura",
+                            "Diferencias fundamentales entre DROP, TRUNCATE y DELETE"
+                        ],
+                        badge: "DDL Alter/Drop",
+                        isBonus: false,
+                        snippet: "ALTER TABLE clientes ADD COLUMN telefono VARCHAR(20);\nTRUNCATE TABLE logs_temporales;"
+                    },
+                    {
+                        id: 14,
+                        title: "Clase 14: Funciones de Agregación",
+                        youtubeTitle: "FUNCIONES DE AGREGACION - COMO USAR COUNT SUM AVG MAX y MIN EN MYSQL?- CLASE #14",
+                        youtubeUrl: "https://youtu.be/y5y-l4w4MAI",
+                        topics: [
+                            "COUNT(): Conteo de registros totales y no nulos",
+                            "SUM(): Sumatoria de valores numéricos",
+                            "AVG(): Cálculo del promedio",
+                            "MAX() y MIN(): Obtención de valores extremos",
+                            "Uso de agregaciones en reportes de negocio"
+                        ],
+                        badge: "Agregaciones",
+                        isBonus: false,
+                        snippet: "SELECT \n  COUNT(*) AS total_ventas,\n  SUM(monto) AS facturacion_total,\n  AVG(monto) AS ticket_promedio,\n  MAX(monto) AS venta_maxima\nFROM ventas;"
+                    },
+                    {
+                        id: 15,
+                        title: "Clase 15: Agrupamiento con GROUP BY y HAVING",
+                        youtubeTitle: "COMO USAR GROUP BY Y HAVING EN MYSQL?- CLASE #15",
+                        youtubeUrl: "https://youtu.be/LETxd6z_u50",
+                        topics: [
+                            "Agrupación de datos por dimensiones con GROUP BY",
+                            "Diferencia fundamental entre WHERE (filtrado pre-agregado) y HAVING (filtrado post-agregado)",
+                            "Combinación de agregaciones con agrupamientos múltiples"
+                        ],
+                        badge: "Group By & Having",
+                        isBonus: false,
+                        snippet: "SELECT categoria_id, COUNT(*) AS total_prod, AVG(precio) AS precio_prom\nFROM productos\nGROUP BY categoria_id\nHAVING COUNT(*) > 5\nORDER BY precio_prom DESC;"
+                    }
+                ]
+            },
+            {
+                id: "mod-4",
+                moduleNumber: 4,
+                title: "Módulo 4: Funciones Escalares y Modelado Avanzado",
+                description: "Manipulación de cadenas, matemáticas, fechas, arquitectura de modelos Estrella/Copo de Nieve e inserción masiva DML.",
+                icon: "fa-cubes",
+                classes: [
+                    {
+                        id: 16,
+                        title: "Clase 16: Funciones Escalares - Funciones de Cadena en Strings",
+                        youtubeTitle: "FUNCIONES DE STRING - COMO USAR CONCAT SUBSTRING UCASE LCASE EN MYSQL? - CLASE #16",
+                        youtubeUrl: "https://youtu.be/ki8kQTGELSg",
+                        topics: [
+                            "CONCAT() y CONCAT_WS() para unión de textos",
+                            "SUBSTRING() / SUBSTR() para extracción de caracteres",
+                            "UCASE() / UPPER() y LCASE() / LOWER() para conversión de caja",
+                            "REVERSE(), TRIM(), SPACE(), CHAR_LENGTH() y LENGTH()",
+                            "Documentación oficial MySQL 8.0 String Functions"
+                        ],
+                        badge: "Funciones String",
+                        isBonus: false,
+                        snippet: "SELECT CONCAT(UCASE(apellido), ', ', LOWER(nombre)) AS nombre_completo\nFROM usuarios;"
+                    },
+                    {
+                        id: 17,
+                        title: "Clase 17: Funciones Escalares - Funciones Numéricas",
+                        youtubeTitle: "FUNCIONES NUMÉRICAS EN MYSQL - CLASE #17",
+                        youtubeUrl: "https://youtu.be/yP4hWrwydc8",
+                        topics: [
+                            "Operaciones aritméticas avanzadas (+, -, *, /, %)",
+                            "Funciones logarítmicas: LOG(), LOG2(), LOG10()",
+                            "Redondeo y truncamiento: ROUND(), FLOOR(), CEILING(), TRUNCATE()",
+                            "Uso práctico de funciones matemáticas en reportes de precios"
+                        ],
+                        badge: "Funciones Math",
+                        isBonus: false,
+                        snippet: "SELECT precio, ROUND(precio, 1) AS redondeado, FLOOR(precio) AS piso, CEIL(precio) AS techo\nFROM productos;"
+                    },
+                    {
+                        id: 18,
+                        title: "Clase 18: Funciones Escalares - Funciones de Fecha y Tiempo",
+                        youtubeTitle: "FUNCIONES DE FECHAS EN MYSQL - DATOS TIPO DATE - CLASE #18",
+                        youtubeUrl: "https://youtu.be/ijP8xuOFvGQ",
+                        topics: [
+                            "Obtención de tiempo actual: CURDATE(), CURTIME(), NOW()",
+                            "Cálculo de diferencia entre fechas: DATEDIFF()",
+                            "Extracción de componentes: DAYNAME(), MONTHNAME(), YEAR(), DAY()",
+                            "Operaciones con intervalos de fechas"
+                        ],
+                        badge: "Funciones Date",
+                        isBonus: false,
+                        snippet: "SELECT cliente, fecha_nacimiento, DATEDIFF(CURDATE(), fecha_nacimiento)/365 AS edad_aprox\nFROM clientes;"
+                    },
+                    {
+                        id: 99,
+                        title: "Clase Bonus: TEST PROVINCIA MICROCRÉDITOS EN SQL",
+                        youtubeTitle: "TEST SQL PARA TRABAJAR EN UN BANCO DE ARGENTINA - Entrevista laboral - Clase Especial",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Resolución completa en vivo de la prueba técnica real tomada a Nicolás para Banco Provincia Argentina",
+                            "Consultas analíticas avanzadas solicitadas en el sector bancario / financiero",
+                            "Tips de optimización y lógica para entrevistas de trabajo en Data & Analytics"
+                        ],
+                        badge: "Entrevista Real",
+                        isBonus: true,
+                        snippet: "-- Ejercicio de Banco Provincia: Cálculo de mora y perfil crediticio\nSELECT cliente_id, SUM(monto_prestamo) AS total_prestado\nFROM creditos\nWHERE dias_atraso > 30\nGROUP BY cliente_id\nHAVING total_prestado > 500000;"
+                    },
+                    {
+                        id: 19,
+                        title: "Clase 19: Tipos de Tablas y Modelos Multidimensionales",
+                        youtubeTitle: "Que son las TABLAS en SQL? - MODELO ESTRELLA - MODELO COPO DE NIEVE - Clase #19",
+                        youtubeUrl: "https://youtu.be/-XOLRL8aHHA",
+                        topics: [
+                            "Tipos de tablas (Transaccionales, maestras, hechos, dimensiones)",
+                            "Modelo Relacional vs. Modelo Multidimensional",
+                            "Modelo en Estrella (Star Schema) vs. Modelo Copo de Nieve (Snowflake Schema)",
+                            "Propiedades: AUTO_INCREMENT, Modo Seguro (SQL_SAFE_UPDATES)",
+                            "Relaciones y Claves Concatenadas"
+                        ],
+                        badge: "Modelado BI",
+                        isBonus: false
+                    },
+                    {
+                        id: 20,
+                        title: "Clase 20: Integridad Referencial y Restricciones",
+                        youtubeTitle: "Integridad referencial y restricciones - Clase #20",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Reglas de Integridad Referencial en BBDD Relacionales",
+                            "Comportamiento de claves foráneas en actualización y borrado",
+                            "Acciones en ON UPDATE y ON DELETE:",
+                            "CASCADE (Efecto en cascada)",
+                            "NO ACTION / RESTRICT (Bloqueo de eliminación por dependencia)",
+                            "SET NULL"
+                        ],
+                        badge: "Integridad & FK",
+                        isBonus: false,
+                        snippet: "ALTER TABLE pedidos\nADD CONSTRAINT fk_cliente\nFOREIGN KEY (cliente_id) REFERENCES clientes(id)\nON DELETE CASCADE ON UPDATE CASCADE;"
+                    },
+                    {
+                        id: 21,
+                        title: "Clase 21: Sublenguaje DML - Inserción de Datos (INSERT)",
+                        youtubeTitle: "Sublenguaje DML - Introducción y Full Insert - Clase #21",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Introducción al Data Manipulation Language (DML)",
+                            "Sintaxis de INSERT INTO",
+                            "Full Insert (Inserción especificando todas las columnas)",
+                            "Inserción múltiple de filas en una sola instrucción"
+                        ],
+                        badge: "DML Insert",
+                        isBonus: false,
+                        snippet: "INSERT INTO categorias (nombre, descripcion) VALUES \n('Electrónica', 'Dispositivos y gadgets'),\n('Hogar', 'Muebles y decoración');"
+                    },
+                    {
+                        id: 22,
+                        title: "Clase 22: Sublenguaje DML - UPDATE y DELETE",
+                        youtubeTitle: "Sublenguaje DML - Update y Delete - Clase #22",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Modificación de registros existentes con UPDATE",
+                            "Eliminación de registros con DELETE FROM",
+                            "Importancia vital de incluir la cláusula WHERE",
+                            "Modo Seguro en MySQL Workbench (Safe Update Mode) y desactivación"
+                        ],
+                        badge: "DML Update/Delete",
+                        isBonus: false,
+                        snippet: "SET SQL_SAFE_UPDATES = 0;\nUPDATE productos SET precio = precio * 1.10 WHERE categoria_id = 2;\nDELETE FROM carritos_abandonados WHERE fecha < '2023-01-01';"
+                    },
+                    {
+                        id: 23,
+                        title: "Clase 23: Inserción Masiva de Datos desde Archivos CSV",
+                        youtubeTitle: "Inserción desde CSV - Kaggle - Clase #23",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Importación de conjuntos de datos masivos desde Kaggle",
+                            "Uso del wizard Table Data Import Wizard en MySQL Workbench",
+                            "Carga mediante script SQL con LOAD DATA INFILE",
+                            "Manejo de codificaciones (UTF-8) y delimitadores"
+                        ],
+                        badge: "Import CSV",
+                        isBonus: false
+                    },
+                    {
+                        id: 24,
+                        title: "Clase 24: Integración I - Creación de Base de Datos Integral",
+                        youtubeTitle: "Integración - Armado de base nueva - Clase #24",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Proyecto Integrador Práctico I",
+                            "Diseño completo desde cero de un esquema relacional para un caso de negocio real",
+                            "Aplicación conjunta de DDL, claves PK/FK e inserciones DML"
+                        ],
+                        badge: "Proyecto I",
+                        isBonus: false
+                    }
+                ]
+            },
+            {
+                id: "mod-5",
+                moduleNumber: 5,
+                title: "Módulo 5: Vistas, JOINS y Programación SQL",
+                description: "Creación de vistas, consultas multitabla avanzadas con JOINS, subconsultas en DML, Stored Procedures y Triggers automáticos.",
+                icon: "fa-code-branch",
+                classes: [
+                    {
+                        id: 25,
+                        title: "Clase 25: Vistas en SQL (CREATE VIEW)",
+                        youtubeTitle: "Vistas en SQL - Clase #25",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "¿Qué es una vista (VIEW) y por qué se le llama 'tabla virtual'?",
+                            "Sintaxis de CREATE VIEW y ALTER VIEW",
+                            "Beneficios de seguridad, simplificación de consultas complejas y abstracción",
+                            "Mantenimiento y eliminación con DROP VIEW"
+                        ],
+                        badge: "Vistas (Views)",
+                        isBonus: false,
+                        snippet: "CREATE VIEW vw_resumen_ventas AS\nSELECT c.nombre, COUNT(v.id) AS compras, SUM(v.monto) AS total\nFROM clientes c\nJOIN ventas v ON c.id = v.cliente_id\nGROUP BY c.id;"
+                    },
+                    {
+                        id: 26,
+                        title: "Clase 26: Consultas Multitable - JOINS (Parte 1)",
+                        youtubeTitle: "Joins Parte 1 - Clase #26",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Fundamentos de las combinaciones de tablas",
+                            "INNER JOIN: Intersección exacta de conjuntos",
+                            "LEFT JOIN (LEFT OUTER JOIN): Preservación de tabla izquierda",
+                            "RIGHT JOIN (RIGHT OUTER JOIN): Preservación de tabla derecha",
+                            "Uso de alias de tablas para legibilidad"
+                        ],
+                        badge: "Joins Part 1",
+                        isBonus: false,
+                        snippet: "SELECT p.id, c.nombre, p.fecha_pedido\nFROM pedidos p\nINNER JOIN clientes c ON p.cliente_id = c.id;"
+                    },
+                    {
+                        id: 27,
+                        title: "Clase 27: Consultas Multitable - JOINS (Parte 2)",
+                        youtubeTitle: "Joins Parte 2 - Clase #27",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "FULL OUTER JOIN (Simulación en MySQL mediante UNION)",
+                            "CROSS JOIN (Producto Cartesiano)",
+                            "SELF JOIN (Unión de una tabla consigo misma)",
+                            "Combinación de múltiples JOINS en una sola consulta"
+                        ],
+                        badge: "Joins Part 2",
+                        isBonus: false,
+                        snippet: "SELECT a.nombre AS empleado, b.nombre AS jefe\nFROM empleados a\nLEFT JOIN empleados b ON a.jefe_id = b.id;"
+                    },
+                    {
+                        id: 28,
+                        title: "Clase 28: DML con Subconsultas",
+                        youtubeTitle: "DML con Subconsultas - Clase #28",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Uso de subconsultas dentro de sentencias INSERT, UPDATE y DELETE",
+                            "Subconsultas correlacionadas",
+                            "Operadores IN, ANY, ALL, EXISTS y NOT EXISTS"
+                        ],
+                        badge: "Subconsultas DML",
+                        isBonus: false,
+                        snippet: "DELETE FROM clientes \nWHERE id NOT IN (SELECT DISTINCT cliente_id FROM ventas);"
+                    },
+                    {
+                        id: 29,
+                        title: "Clase 29: Funciones Definidas por el Usuario (UDF) - Parte 1",
+                        youtubeTitle: "Funciones de usuario Parte 1 - Clase #29",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Concepto de User Defined Functions (UDF)",
+                            "Sintaxis de CREATE FUNCTION",
+                            "Parámetros de entrada, tipo de retorno (RETURNS) y cuerpo determinista",
+                            "Diferencias entre Funciones y Stored Procedures"
+                        ],
+                        badge: "UDF Part 1",
+                        isBonus: false
+                    },
+                    {
+                        id: 30,
+                        title: "Clase 30: Funciones Definidas por el Usuario (UDF) - Parte 2",
+                        youtubeTitle: "Funciones de usuario Parte 2 - Clase #30",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Uso de variables internas (DECLARE, SET)",
+                            "Estructuras de control condicional (IF ... THEN ... ELSE)",
+                            "Invocación de funciones personalizadas dentro de consultas SELECT"
+                        ],
+                        badge: "UDF Part 2",
+                        isBonus: false,
+                        snippet: "DELIMITER //\nCREATE FUNCTION fn_CalcularIva(precio DECIMAL(10,2))\nRETURNS DECIMAL(10,2)\nDETERMINISTIC\nBEGIN\n  RETURN precio * 1.21;\nEND //\nDELIMITER ;"
+                    },
+                    {
+                        id: 31,
+                        title: "Clase 31: Stored Procedures (Procedimientos Almacenados)",
+                        youtubeTitle: "Stored Procedures - Clase #31",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "¿Qué es un Stored Procedure?",
+                            "Parámetros IN, OUT e INOUT",
+                            "Bloques DELIMITER // ... END //",
+                            "Ejecución con CALL procedimiento()",
+                            "Automatización de lógica de negocios en el servidor de BBDD"
+                        ],
+                        badge: "Stored Procedures",
+                        isBonus: false,
+                        snippet: "DELIMITER //\nCREATE PROCEDURE sp_RegistrarCliente(IN p_nombre VARCHAR(50), IN p_email VARCHAR(50))\nBEGIN\n  INSERT INTO clientes(nombre, email) VALUES (p_nombre, p_email);\nEND //\nDELIMITER ;\n\nCALL sp_RegistrarCliente('Carlos', 'carlos@mail.com');"
+                    },
+                    {
+                        id: 32,
+                        title: "Clase 32: Triggers (Disparadores Automáticos)",
+                        youtubeTitle: "Triggers - Disparadores en MySQL - Clase #32",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "¿Qué es un Trigger / Disparador?",
+                            "Eventos: BEFORE / AFTER en INSERT, UPDATE, DELETE",
+                            "Uso de los pseudorregistros NEW y OLD",
+                            "Complemento práctico: Cálculo automático de IVA previo al registro"
+                        ],
+                        badge: "Triggers",
+                        isBonus: false,
+                        snippet: "DELIMITER //\nCREATE TRIGGER before_insert_pruebanumericas\nBEFORE INSERT ON pruebanumericas\nFOR EACH ROW\nBEGIN\n  SET NEW.PrecioConIva = NEW.PrecioSinIva * 1.21;\nEND;\n//\nDELIMITER ;"
+                    }
+                ]
+            },
+            {
+                id: "mod-6",
+                moduleNumber: 6,
+                title: "Módulo 6: Seguridad, Transacciones y Administración",
+                description: "Proyectos integradores avanzados, administración de usuarios (DCL), control transaccional (TCL) y respaldos de BBDD.",
+                icon: "fa-shield-halved",
+                classes: [
+                    {
+                        id: 33,
+                        title: "Clase 33: Proyecto de Integración II",
+                        youtubeTitle: "Proyecto Integrador Avanzado - Clase #33",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Segundo hito de integración práctica del curso",
+                            "Consolidación de Joins, Vistas, Stored Procedures y Triggers en un caso de estudio empresarial real"
+                        ],
+                        badge: "Proyecto II",
+                        isBonus: false
+                    },
+                    {
+                        id: 34,
+                        title: "Clase 34: Introducción a DCL - Seguridad y Usuarios",
+                        youtubeTitle: "Intro DCL - Create / Grant / Revoke - Clase #34",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Data Control Language (DCL) y seguridad en servidores MySQL",
+                            "Creación de usuarios con CREATE USER 'usuario'@'host'",
+                            "Concesión de privilegios con GRANT (SELECT, INSERT, ALL PRIVILEGES)",
+                            "Revocación de permisos con REVOKE",
+                            "Actualización de la tabla de privilegios (FLUSH PRIVILEGES)"
+                        ],
+                        badge: "DCL Seguridad",
+                        isBonus: false,
+                        snippet: "CREATE USER 'analista'@'localhost' IDENTIFIED BY 'Password123!';\nGRANT SELECT, INSERT ON db_empresa.* TO 'analista'@'localhost';\nFLUSH PRIVILEGES;"
+                    },
+                    {
+                        id: 35,
+                        title: "Clase 35: Sublenguaje TCL - Control de Transacciones",
+                        youtubeTitle: "TCL - Check, Rollback, Commit - Clase #35",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Transaction Control Language (TCL) y propiedades ACID",
+                            "Inicio de transacción con START TRANSACTION / BEGIN",
+                            "Confirmación permanente con COMMIT",
+                            "Reversión de cambios en caso de error con ROLLBACK",
+                            "Puntos de restauración con SAVEPOINT y RELEASE SAVEPOINT"
+                        ],
+                        badge: "TCL Transacciones",
+                        isBonus: false,
+                        snippet: "START TRANSACTION;\nUPDATE cuentas SET saldo = saldo - 500 WHERE id = 1;\nUPDATE cuentas SET saldo = saldo + 500 WHERE id = 2;\nCOMMIT;"
+                    },
+                    {
+                        id: 36,
+                        title: "Clase 36: Backup y Restauración de Bases de Datos",
+                        youtubeTitle: "Backup y Restauración de BBDD en MySQL - Clase #36",
+                        youtubeUrl: "https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s",
+                        topics: [
+                            "Importancia de la estrategia de copias de seguridad",
+                            "Generación de Dumps (.sql) con Data Export en MySQL Workbench",
+                            "Uso de utilidades de consola mysqldump",
+                            "Restauración completa de esquema y datos (Data Import / Restore)"
+                        ],
+                        badge: "Administración BBDD",
+                        isBonus: false
+                    }
+                ]
+            }
+        ];
+
+        // ESTADO DE LA APLICACIÓN
+        let completedClasses = JSON.parse(localStorage.getItem('eelc_sql_completed_classes')) || [];
+        let currentUserId = localStorage.getItem('eelc_sql_user_id') || null;
+        let currentStatusFilter = 'all';
+        let currentModuleFilter = 'all';
+
+        const modulesContainer = document.getElementById('modules-container');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const progressText = document.getElementById('progress-text');
+        const progressPercent = document.getElementById('progress-percent');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const emptyState = document.getElementById('empty-state');
+        const modulePillsContainer = document.getElementById('module-pills-container');
+        const userAuthWidget = document.getElementById('user-auth-widget');
+        const syncStatus = document.getElementById('sync-status');
+
+        const totalClasses = syllabusData.reduce((acc, mod) => acc + mod.classes.length, 0);
+
+        // INICIALIZACIÓN AL CARGAR LA PÁGINA
+        window.addEventListener('DOMContentLoaded', async () => {
+            renderModuleFilters();
+            updateUserWidgetUI();
+
+            if (currentUserId && isGasConfigured()) {
+                await loadUserProgressFromGAS(currentUserId);
+            } else {
+                renderModules();
+                updateProgressUI();
+            }
+        });
+
+        function isGasConfigured() {
+            return GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
+        }
+
+        // COMUNICACIÓN CON GOOGLE APPS SCRIPT
+        async function loadUserProgressFromGAS(userId) {
+            if (!isGasConfigured() || !userId) return;
+            try {
+                showSyncingState(true);
+                const response = await fetch(`${GAS_WEB_APP_URL}?userId=${encodeURIComponent(userId)}`);
+                const result = await response.json();
+
+                if (result.status === "success" && Array.isArray(result.completedClasses)) {
+                    completedClasses = result.completedClasses;
+                    localStorage.setItem('eelc_sql_completed_classes', JSON.stringify(completedClasses));
+                    showToast('Progreso cargado desde Google Sheets', 'success');
+                } else {
+                    // Si el usuario no estaba en Sheets, guardamos su avance local actual
+                    await saveUserProgressToGAS(userId, completedClasses);
+                }
+            } catch (error) {
+                console.error("Error al cargar desde Apps Script:", error);
+                showToast('Error de sincronización. Operando localmente.', 'error');
+            } finally {
+                showSyncingState(false);
+            }
+            renderModules();
+            updateProgressUI();
+        }
+
+        async function saveUserProgressToGAS(userId, classesArray) {
+            if (!isGasConfigured() || !userId) return;
+            showSyncingState(true);
+            try {
+                // Envío principal mediante POST no-cors
+                await fetch(GAS_WEB_APP_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: userId,
+                        completedClasses: classesArray
+                    })
+                });
+
+                // Fallback redundante por GET para asegurar la escritura en Sheets
+                const getFallbackUrl = `${GAS_WEB_APP_URL}?action=save&userId=${encodeURIComponent(userId)}&completedClasses=${encodeURIComponent(JSON.stringify(classesArray))}`;
+                fetch(getFallbackUrl, { mode: "no-cors" }).catch(() => {});
+
+            } catch (error) {
+                console.error("Error al guardar en Apps Script:", error);
+            } finally {
+                setTimeout(() => showSyncingState(false), 800);
+            }
+        }
+
+        function showSyncingState(isSyncing) {
+            if (!currentUserId || !isGasConfigured()) return;
+            if (isSyncing) {
+                syncStatus.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-purple-400"></i> Sincronizando con Google Sheets...`;
+                syncStatus.className = "hidden sm:inline-flex items-center gap-1.5 text-purple-300 font-medium";
+            } else {
+                syncStatus.innerHTML = `<i class="fa-solid fa-file-excel text-green-400"></i> Google Sheets Conectado`;
+                syncStatus.className = "hidden sm:inline-flex items-center gap-1.5 text-green-300 font-medium";
+            }
+        }
+
+        // GESTIÓN DE USUARIOS DE LA INTERFAZ
+        function handleUserIdentify(e) {
+            e.preventDefault();
+            const input = document.getElementById('auth-username-input').value.trim();
+            if (!input) return;
+
+            currentUserId = input;
+            localStorage.setItem('eelc_sql_user_id', currentUserId);
+            closeAuthModal();
+            updateUserWidgetUI();
+
+            if (isGasConfigured()) {
+                loadUserProgressFromGAS(currentUserId);
+            } else {
+                showToast(`Registrado como ${currentUserId}`, 'success');
+            }
+        }
+
+        function logoutUser() {
+            currentUserId = null;
+            localStorage.removeItem('eelc_sql_user_id');
+            completedClasses = JSON.parse(localStorage.getItem('eelc_sql_completed_classes')) || [];
+            updateUserWidgetUI();
+            renderModules();
+            updateProgressUI();
+            showToast('Sesión de usuario desvinculada. Cambiado a Modo Local', 'info');
+        }
+
+        function updateUserWidgetUI() {
+            if (!currentUserId) {
+                // MODO INVITADO
+                syncStatus.innerHTML = `<i class="fa-solid fa-hard-drive text-amber-400"></i> Modo Local (Guardado en navegador)`;
+                syncStatus.className = "hidden sm:inline-flex items-center gap-1.5 text-amber-300 font-medium";
+
+                userAuthWidget.innerHTML = `
+                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold flex items-center gap-2 shadow-md transition transform hover:scale-105">
+                        <i class="fa-solid fa-id-card"></i> Identificar mi Email
+                    </button>
+                `;
+            } else {
+                // USUARIO IDENTIFICADO
+                if (isGasConfigured()) {
+                    syncStatus.innerHTML = `<i class="fa-solid fa-file-excel text-green-400"></i> Google Sheets Conectado`;
+                    syncStatus.className = "hidden sm:inline-flex items-center gap-1.5 text-green-300 font-medium";
+                } else {
+                    syncStatus.innerHTML = `<i class="fa-solid fa-hard-drive text-amber-400"></i> Modo Local (${currentUserId})`;
+                    syncStatus.className = "hidden sm:inline-flex items-center gap-1.5 text-amber-300 font-medium";
+                }
+
+                userAuthWidget.innerHTML = `
+                    <div class="flex items-center space-x-3 bg-purple-900/40 border border-purple-500/30 px-3 py-1.5 rounded-xl">
+                        <div class="w-6 h-6 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center">
+                            ${currentUserId.charAt(0).toUpperCase()}
+                        </div>
+                        <span class="text-white font-semibold text-xs max-w-[140px] truncate">${currentUserId}</span>
+                        <button onclick="logoutUser()" class="text-slate-400 hover:text-red-400 text-xs ml-1 transition" title="Desvincular usuario">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // RENDERIZADO DE MODULOS Y CLASES
+        function renderModuleFilters() {
+            let html = `
+                <button onclick="setModuleFilter('all')" id="pill-mod-all" 
+                    class="px-3.5 py-1.5 rounded-lg bg-purple-600 text-white font-semibold transition shrink-0">
+                    Todos los Módulos (${totalClasses})
+                </button>
+            `;
+
+            syllabusData.forEach(mod => {
+                html += `
+                    <button onclick="setModuleFilter('${mod.id}')" id="pill-mod-${mod.id}" 
+                        class="px-3.5 py-1.5 rounded-lg bg-slate-900 border border-purple-900/50 text-slate-300 hover:text-white transition shrink-0">
+                        Mód. ${mod.moduleNumber} (${mod.classes.length})
+                    </button>
+                `;
+            });
+
+            modulePillsContainer.innerHTML = html;
+        }
+
+        function renderModules() {
+            const query = searchInput.value.toLowerCase().trim();
+            modulesContainer.innerHTML = '';
+            let visibleClassesCount = 0;
+
+            syllabusData.forEach((module) => {
+                if (currentModuleFilter !== 'all' && module.id !== currentModuleFilter) return;
+
+                const filteredClasses = module.classes.filter(cls => {
+                    const isCompleted = completedClasses.includes(cls.id);
+                    
+                    if (currentStatusFilter === 'completed' && !isCompleted) return false;
+                    if (currentStatusFilter === 'pending' && isCompleted) return false;
+
+                    if (query === '') return true;
+
+                    const matchTitle = cls.title.toLowerCase().includes(query);
+                    const matchYoutube = cls.youtubeTitle.toLowerCase().includes(query);
+                    const matchBadge = cls.badge.toLowerCase().includes(query);
+                    const matchTopics = cls.topics.some(t => t.toLowerCase().includes(query));
+                    const matchSnippet = cls.snippet ? cls.snippet.toLowerCase().includes(query) : false;
+
+                    return matchTitle || matchYoutube || matchBadge || matchTopics || matchSnippet;
+                });
+
+                if (filteredClasses.length === 0) return;
+
+                visibleClassesCount += filteredClasses.length;
+                const modCompletedCount = module.classes.filter(c => completedClasses.includes(c.id)).length;
+
+                const moduleCard = document.createElement('div');
+                moduleCard.className = 'glass-card rounded-2xl overflow-hidden border border-purple-900/40 shadow-xl transition';
+                moduleCard.id = `accordion-${module.id}`;
+
+                moduleCard.innerHTML = `
+                    <button onclick="toggleAccordion('${module.id}')" class="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-gradient-to-r from-purple-950/60 via-slate-900/90 to-slate-950 hover:bg-purple-900/20 transition group">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-pink-400 group-hover:scale-110 transition duration-300">
+                                <i class="fa-solid ${module.icon} text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-3">
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-white group-hover:text-pink-300 transition">${module.title}</h2>
+                                    <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-purple-950 border border-purple-700/50 text-[11px] font-mono font-semibold text-purple-300">
+                                        ${modCompletedCount}/${module.classes.length} completadas
+                                    </span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">${module.description}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="accordion-icon w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-300 group-hover:bg-purple-600 group-hover:text-white transition">
+                                <i class="fa-solid fa-chevron-down text-sm transition-transform duration-300"></i>
+                            </span>
+                        </div>
+                    </button>
+
+                    <div id="content-${module.id}" class="accordion-content border-t border-purple-900/30 p-4 sm:p-6 space-y-4 bg-slate-950/40">
+                        ${filteredClasses.map(cls => renderClassCard(cls)).join('')}
+                    </div>
+                `;
+
+                modulesContainer.appendChild(moduleCard);
+            });
+
+            if (visibleClassesCount === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        function renderClassCard(cls) {
+            const isDone = completedClasses.includes(cls.id);
+            const videoUrl = cls.youtubeUrl || 'https://www.youtube.com/watch?v=GI2HPq7DnII&t=87s';
+
+            return `
+                <div class="p-4 sm:p-5 rounded-xl border transition-all duration-200 ${
+                    isDone 
+                        ? 'bg-purple-950/20 border-purple-500/40 shadow-inner opacity-90' 
+                        : 'bg-slate-900/80 border-purple-900/30 hover:border-purple-500/30'
+                }" id="class-card-${cls.id}">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        
+                        <div class="flex items-start space-x-4 flex-1">
+                            <button onclick="toggleClassCompleted(${cls.id})" 
+                                class="mt-1 shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition ${
+                                    isDone 
+                                        ? 'bg-gradient-to-tr from-pink-500 to-purple-600 border-pink-400 text-white' 
+                                        : 'border-slate-600 hover:border-purple-400 bg-slate-950'
+                                }" title="${isDone ? 'Marcar como pendiente' : 'Marcar como completada'}">
+                                ${isDone ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                            </button>
+
+                            <div class="space-y-2 w-full">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="text-base sm:text-lg font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}">
+                                        ${cls.title}
+                                    </h3>
+                                    
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                        cls.isBonus 
+                                            ? 'bg-pink-600/30 text-pink-300 border border-pink-500/50' 
+                                            : 'bg-purple-900/40 text-purple-300 border border-purple-700/40'
+                                    }">
+                                        ${cls.badge}
+                                    </span>
+
+                                    ${isDone ? '<span class="text-[10px] font-semibold text-pink-400 bg-pink-950/40 px-2 py-0.5 rounded border border-pink-800/40"><i class="fa-solid fa-check-circle"></i> Completada</span>' : ''}
+                                </div>
+
+                                <p class="text-xs sm:text-sm text-purple-200 font-mono italic">
+                                    <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-pink-300 hover:text-pink-200 hover:underline inline-flex items-center gap-1.5 transition group" 
+                                       title="Abrir este video en YouTube">
+                                        <i class="fa-brands fa-youtube text-red-500 text-sm group-hover:scale-110 transition"></i>
+                                        <span>"${cls.youtubeTitle}"</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-purple-400 opacity-70"></i>
+                                    </a>
+                                </p>
+
+                                <ul class="mt-2 space-y-1 text-xs text-slate-300">
+                                    ${cls.topics.map(topic => `
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-pink-400 mt-0.5">&bull;</span>
+                                            <span>${topic}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+
+                                ${cls.snippet ? `
+                                    <div class="mt-3 relative group">
+                                        <div class="absolute right-2 top-2 z-10">
+                                            <button onclick="copyCode(this, \`${escapeJsString(cls.snippet)}\`)" 
+                                                class="px-2.5 py-1 rounded bg-purple-900/80 hover:bg-purple-700 text-purple-200 text-xs border border-purple-500/30 transition flex items-center gap-1 shadow">
+                                                <i class="fa-solid fa-copy text-xs"></i> Copiar Código
+                                            </button>
+                                        </div>
+                                        <pre class="bg-slate-950 p-3.5 rounded-xl border border-purple-900/60 font-mono text-xs text-purple-200 overflow-x-auto shadow-inner pt-8">${escapeHtml(cls.snippet)}</pre>
+                                    </div>
+                                ` : ''}
+
+                            </div>
+                        </div>
+
+                        <div class="shrink-0 flex sm:flex-col items-end justify-between sm:justify-start gap-2 pt-2 sm:pt-0">
+                            <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" 
+                               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-semibold text-xs transition shadow-lg shadow-red-900/20 hover:scale-105 active:scale-95"
+                               title="Ver clase en YouTube">
+                                <i class="fa-brands fa-youtube text-sm"></i>
+                                <span>Ver Clase</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        // ACCIONES DE INTERFAZ Y PROGRESO
+        async function toggleClassCompleted(classId) {
+            const index = completedClasses.indexOf(classId);
+            if (index > -1) {
+                completedClasses.splice(index, 1);
+                showToast('Clase marcada como pendiente', 'info');
+            } else {
+                completedClasses.push(classId);
+                showToast('¡Clase completada exitosamente!', 'success');
+            }
+
+            localStorage.setItem('eelc_sql_completed_classes', JSON.stringify(completedClasses));
+
+            if (currentUserId && isGasConfigured()) {
+                await saveUserProgressToGAS(currentUserId, completedClasses);
+            }
+
+            renderModules();
+            updateProgressUI();
+        }
+
+        function updateProgressUI() {
+            const count = completedClasses.length;
+            const percent = Math.round((count / totalClasses) * 100);
+
+            progressText.innerText = `${count} / ${totalClasses} Clases Completadas`;
+            progressPercent.innerText = `${percent}%`;
+            progressBarFill.style.width = `${percent}%`;
+        }
+
+        async function resetProgress() {
+            if (completedClasses.length === 0) return;
+
+            completedClasses = [];
+            localStorage.removeItem('eelc_sql_completed_classes');
+
+            if (currentUserId && isGasConfigured()) {
+                await saveUserProgressToGAS(currentUserId, []);
+            }
+
+            renderModules();
+            updateProgressUI();
+            showToast('Progreso reiniciado por completo', 'info');
+        }
+
+        function toggleAccordion(moduleId) {
+            const card = document.getElementById(`accordion-${moduleId}`);
+            const content = document.getElementById(`content-${moduleId}`);
+            const icon = card.querySelector('.accordion-icon i');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        function toggleAllAccordions(expand) {
+            syllabusData.forEach(mod => {
+                const content = document.getElementById(`content-${mod.id}`);
+                const card = document.getElementById(`accordion-${mod.id}`);
+                if (content && card) {
+                    const icon = card.querySelector('.accordion-icon i');
+                    if (expand) {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-180');
+                    }
+                }
+            });
+        }
+
+        function setFilterStatus(status) {
+            currentStatusFilter = status;
+            ['all', 'pending', 'completed'].forEach(st => {
+                const btn = document.getElementById(`btn-status-${st}`);
+                btn.className = st === status 
+                    ? "px-3.5 py-2 rounded-lg bg-purple-600 text-white font-bold shadow transition"
+                    : "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition";
+            });
+            renderModules();
+        }
+
+        function setModuleFilter(moduleId) {
+            currentModuleFilter = moduleId;
+            const pills = modulePillsContainer.querySelectorAll('button');
+            pills.forEach(p => p.className = "px-3.5 py-1.5 rounded-lg bg-slate-900 border border-purple-900/50 text-slate-300 hover:text-white transition shrink-0");
+            
+            const activePill = document.getElementById(`pill-mod-${moduleId}`);
+            if (activePill) activePill.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white font-semibold transition shrink-0";
+
+            renderModules();
+        }
+
+        function filterClasses() {
+            const query = searchInput.value.trim();
+            if (query.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+                toggleAllAccordions(true);
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+            renderModules();
+        }
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            renderModules();
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            currentStatusFilter = 'all';
+            currentModuleFilter = 'all';
+            renderModuleFilters();
+            setFilterStatus('all');
+            renderModules();
+        }
+
+        function openAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function openCheatSheet() {
+            const modal = document.getElementById('cheat-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeCheatSheet() {
+            const modal = document.getElementById('cheat-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function copyCode(btnElement, textToCopy) {
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                const originalHTML = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fa-solid fa-check text-xs"></i> ¡Copiado!';
+                btnElement.classList.replace('bg-purple-900/80', 'bg-green-600');
+                
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHTML;
+                    btnElement.classList.replace('bg-green-600', 'bg-purple-900/80');
+                }, 2000);
+
+                showToast('Código copiado al portapapeles', 'success');
+            } catch (err) {
+                showToast('No se pudo copiar el código', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-pink-400 text-xl";
+            } else if (type === 'error') {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-red-400 text-xl";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-purple-400 text-xl";
+            }
+
+            toastMsg.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeJsString(str) {
+            return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+        }
+    </script>
+</body>
+</html>
